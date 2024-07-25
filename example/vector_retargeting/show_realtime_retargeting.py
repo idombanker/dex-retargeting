@@ -106,9 +106,9 @@ def start_retargeting(queue: multiprocessing.Queue, robot_dir: str, config_path:
 
     while True:
         try:
-            rgb = queue.get(timeout=5)
+            rgb = queue.get(timeout=50)
         except Empty:
-            logger.error(f"Fail to fetch image from camera in 5 secs. Please check your web camera device.")
+            logger.error(f"Fail to fetch image from camera in 50 secs. Please check your web camera device.")
             return
 
         _, joint_pos, _, _ = detector.detect(rgb)
@@ -133,7 +133,7 @@ def start_retargeting(queue: multiprocessing.Queue, robot_dir: str, config_path:
 
 def produce_frame(queue: multiprocessing.Queue, camera_path: Optional[str] = None):
     if camera_path is None:
-        cap = cv2.VideoCapture(4)
+        cap = cv2.VideoCapture(0)
     else:
         cap = cv2.VideoCapture(camera_path)
 
@@ -165,8 +165,12 @@ def main(
             to another left robot hand, and the same applies for the right hand.
         camera_path: the device path to feed to opencv to open the web camera. It will use 0 by default.
     """
-    config_path = get_default_config_path(robot_name, retargeting_type, hand_type)
-    robot_dir = Path(__file__).absolute().parent.parent.parent / "assets" / "robots" / "hands"
+    # config_path = get_default_config_path(robot_name, retargeting_type, hand_type)
+    # robot_dir = Path(__file__).absolute().parent.parent.parent / "assets" / "robots" / "hands"
+    
+    # Update these paths to your local paths
+    config_path = Path("../../dex_retargeting/configs/teleop/leap_hand_right_dexpilot.yml")
+    robot_dir = Path("../../assets/robots/hands")
 
     queue = multiprocessing.Queue(maxsize=1000)
     producer_process = multiprocessing.Process(target=produce_frame, args=(queue, camera_path))
